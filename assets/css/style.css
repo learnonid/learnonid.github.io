@@ -1,0 +1,37 @@
+/* Default: Hide both to prevent flickering */
+#navigation,
+#mobile-nav {
+  display: none;
+}
+
+/* Show navigation for medium to large screens */
+@media (min-width: 768px) {
+  #navigation {
+    display: block;
+  }
+}
+
+/* Show mobile navigation for small screens */
+@media (max-width: 767px) {
+  #mobile-nav {
+    display: block;
+  }
+  
+}
+
+.menu-toggle {
+    z-index: 50; /* Memastikan burger button selalu di atas menu */
+    position: relative; /* Menghindari efek positioning yang salah */
+}
+
+.menu {
+    z-index: 40; /* Menu berada di bawah tombol burger */
+}
+
+nav {
+    position: relative; /* Memastikan semua elemen nav terpisah secara layer */
+}
+
+
+
+  

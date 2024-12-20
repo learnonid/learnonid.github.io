@@ -1,0 +1,38 @@
+@keyframes underline {
+    from {
+    width: 0;
+    }
+    to {
+    width: 100%;
+    }
+}
+
+.underline-animation {
+    position: relative;
+    display: inline-block;
+}
+
+.underline-animation::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background-color: currentColor;
+    width: 0;
+    transition: width 0.3s ease-in-out;
+}
+
+.underline-animation:hover::after {
+    width: 100%;
+}
+
+/* Styling untuk ikon */
+.ph-caret-down {
+    transition: transform 0.3s ease;
+}
+
+.rotate {
+    transform: rotate(180deg); /* Rotasi 180 derajat */
+}
+  
