@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Membuat elemen hero section
     const hero = document.createElement('section');
-    hero.className = 'hero text-main-blue-dark py-16 px-12 text-center bg-gradient bg-gradient-to-b from-main-blue to-white';
+    hero.className = 'hero text-main-blue py-16 px-12 text-center bg-gradient bg-gradient-to-b from-main-blue to-white';
   
     // Membuat Carousel
     const carouselWrapper = document.createElement('div');
