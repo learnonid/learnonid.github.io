@@ -1,92 +1,26 @@
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const eventsContainer = document.getElementById('events');
 
-    // Data acara
-    const events = [
-        {
-            event_name: 'Kursus Pemrograman Python',
-            event_type: 'Online',
-            event_date: '10 Januari 2024',
-            location: 'Zoom',
-            description: 'Pelajari dasar-dasar pemrograman Python dengan praktek langsung.',
-            event_image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYbsJFulTRg3kb36fs2oHH0rDX5C0uJ6HBDQ&s'
-        },
-        {
-            event_name: 'Workshop Kecerdasan Buatan (AI)',
-            event_type: 'Offline',
-            event_date: '25 Januari 2024',
-            location: 'Jakarta Convention Center',
-            description: 'Pelajari teknik-teknik terbaru dalam pengembangan teknologi kecerdasan buatan.',
-            event_image: 'https://www.meridean.org/images/artificial-intelligence-course-abroad.png'
-        },
-        {
-            event_name: 'Pelatihan Internet of Things (IoT)',
-            event_type: 'Online',
-            event_date: '05 Februari 2024',
-            location: 'Google Meet',
-            description: 'Memahami konsep IoT dan bagaimana menghubungkan perangkat elektronik dengan internet.',
-            event_image: 'https://www.excelptp.com/wp-content/uploads/2021/05/iot-banner-img.jpg'
-        },
-        {
-            event_name: 'Seminar Desain Grafis',
-            event_type: 'Offline',
-            event_date: '15 Februari 2024',
-            location: 'Jakarta Convention Center',
-            description: 'Mengasah keterampilan desain grafis dengan menggunakan Adobe Illustrator dan Photoshop.',
-            event_image: 'https://i.ytimg.com/vi/GQS7wPujL2k/maxresdefault.jpg'
-        },
-        {
-            event_name: 'Pelatihan Blockchain',
-            event_type: 'Online',
-            event_date: '01 Maret 2024',
-            location: 'Zoom',
-            description: 'Memahami konsep blockchain dan penerapan teknologi ini dalam berbagai industri.',
-            event_image: 'https://www.qtreetechnologies.in/images/block-chain-training-in-coimbatore.jpg'
-        },
-        {
-            event_name: 'Seminar Strategi Pemasaran Digital',
-            event_type: 'Offline',
-            event_date: '10 Maret 2024',
-            location: 'Jakarta Convention Center',
-            description: 'Menguasai strategi pemasaran digital, SEO, dan manajemen media sosial.',
-            event_image: 'https://courses.iid.org.in/public//uploads/media_manager/628.jpg'
-        },
-        {
-            event_name: 'Workshop Pengembangan Aplikasi Mobile',
-            event_type: 'Online',
-            event_date: '20 Maret 2024',
-            location: 'Google Meet',
-            description: 'Pelajari cara membuat aplikasi mobile menggunakan Flutter dan React Native.',
-            event_image: 'https://voksinstitute.com/assets/images/courses/voks-institute-mobile-app-development-course.png'
-        },
-        {
-            event_name: 'Kursus Menulis Konten Kreatif',
-            event_type: 'Offline',
-            event_date: '05 April 2024',
-            location: 'Jakarta Convention Center',
-            description: 'Mengasah kemampuan menulis konten kreatif untuk web dan media sosial.',
-            event_image: 'https://dubai.sae.edu/wp-content/uploads/sites/16/2023/01/Social-Media-1.jpg'
-        },
-        {
-            event_name: 'Pelatihan Keamanan Siber',
-            event_type: 'Online',
-            event_date: '20 April 2024',
-            location: 'Zoom',
-            description: 'Pelajari dasar-dasar keamanan siber dan teknik perlindungan data online.',
-            event_image: 'https://thecyberexpress.com/wp-content/uploads/2023/10/MicrosoftTeams-image-75.png'
-        },
-        {
-            event_name: 'Workshop Analisis Data',
-            event_type: 'Offline',
-            event_date: '10 Mei 2024',
-            location: 'Jakarta Convention Center',
-            description: 'Menguasai teknik analisis data dengan Python dan alat bantu statistik.',
-            event_image: 'https://www.cromacampus.com/public/uploads/Blog/2024/01/week_3/Data-Analyst-Course-After-12th-An-Ultimate-Guide-for-Learners.jpg'
-        },
-    ];
-    
+    // URL endpoint untuk mengambil data acara
+    const eventsEndpoint = 'http://127.0.0.1:3000/event/all';
 
+    // Fungsi untuk mengambil data dari API
+    async function fetchEvents() {
+        try {
+            const response = await fetch(eventsEndpoint);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Gagal mengambil data acara:', error);
+            return [];
+        }
+    }
+
+    let response = await fetchEvents();
+    let events = response.events || [];
     let visibleCards = 6;
 
     // Membuat container untuk kartu acara
