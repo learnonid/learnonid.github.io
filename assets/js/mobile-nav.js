@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Tombol Login
     const loginButton = document.createElement('a');
-    loginButton.href = 'login.html';
+    loginButton.href = './auth/login.html';
     loginButton.className = 'btn-login text-white text-lg z-50 relative'; // Menggunakan class btn-login
     loginButton.innerHTML = 'Login';
     

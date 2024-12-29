@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Login button
   const loginButton = document.createElement('a');
-  loginButton.href = 'login.html';
+  loginButton.href = './auth/login.html';
   loginButton.className = 'btn-login';
   loginButton.textContent = 'Login';
 
