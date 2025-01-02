@@ -66,6 +66,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
                     console.error('Role tidak dikenali:', user.role_id);
                     console.log('User:', user);
+                    console.log('role id:', user.role_id);
                 }
             } else {
                 Swal.fire({
