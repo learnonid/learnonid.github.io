@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eventsContainer = document.getElementById('events');
 
     // URL endpoint untuk mengambil data acara
-    const eventsEndpoint = 'http://127.0.0.1:3000/event/all';
+    const eventsEndpoint = 'https://learnon-2c417dabacf8.herokuapp.com/event/all';
 
     // Fungsi untuk mengambil data dari API
     async function fetchEvents() {
