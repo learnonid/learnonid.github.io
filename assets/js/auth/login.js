@@ -45,6 +45,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                 },
             });
 
+            // Log the user response for debugging
+            console.log('User response:', userResponse);
+
             const user = await userResponse.json();
 
             if (userResponse.ok) {
@@ -60,6 +63,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                         title: 'Terjadi Kesalahan',
                         text: 'Role tidak dikenali. Silakan coba lagi.',
                     });
+
+                    console.error('Role tidak dikenali:', user.role_id);
+                    console.log('User:', user);
                 }
             } else {
                 Swal.fire({
