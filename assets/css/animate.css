@@ -36,3 +36,13 @@
     transform: rotate(180deg); /* Rotasi 180 derajat */
 }
   
+/* Styling untuk link yang aktif */
+.active {
+    font-weight: bold;
+    border-bottom: 2px solid currentColor; /* Garis bawah yang menandakan halaman aktif */
+}
+
+/* Styling untuk ikon dropdown aktif */
+.active + i {
+    transform: rotate(180deg); /* Menunjukkan dropdown aktif dengan rotasi ikon */
+}

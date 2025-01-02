@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ['Online', 'pelatihan-online.html'],
       ['Offline', 'pelatihan-offline.html'],
     ]],
-    ['Buku', '#'],
-    ['Tentang', '#'],
+    ['Buku', 'buku.html'],
+    ['Tentang', 'tentang.html'],
   ];
 
   const navContainer = document.getElementById('navigation');
@@ -43,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
     link.className = 'underline-animation cursor-pointer';
     li.appendChild(link);
 
+    // Check if the current page matches the link and add active class
+    if (window.location.pathname === '/' + url || window.location.pathname === url) {
+      link.classList.add('active');
+    }
+
     if (dropdown) {
       const icon = document.createElement('i');
       icon.className = 'ph ph-caret-down text-sm font-semibold ml-1'; // Add Phosphor caret-down icon
@@ -59,6 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dropdownLink.className = 'block px-4 py-2 hover:bg-gray-200 hover:rounded-md';
         dropdownItem.appendChild(dropdownLink);
         dropdownMenu.appendChild(dropdownItem);
+
+        // Check if the current page matches any dropdown item and add active class
+        if (window.location.pathname === subUrl) {
+          dropdownLink.classList.add('active');
+        }
       });
 
       li.appendChild(dropdownMenu);
@@ -92,4 +102,3 @@ document.addEventListener('DOMContentLoaded', () => {
   // Append nav to the container
   navContainer.appendChild(nav);
 });
-

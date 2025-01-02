@@ -48,3 +48,15 @@ nav {
 .tbl.hidden {
     display: none;
 }
+
+.feature-card {
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  text-align: center;
+}
+.feature-card:hover {
+  transform: scale(1.05);
+}
