@@ -2,6 +2,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     event.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const loader = document.getElementById('loader'); // Ambil elemen loader
 
     if (!email || !password) {
         Swal.fire({
@@ -13,6 +14,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     }
 
     try {
+        // Tampilkan loader
+        loader.classList.remove('hidden');
+
         // Kirim permintaan ke endpoint login
         const response = await fetch('http://127.0.0.1:3000/auth/login', {
             method: 'POST',
@@ -24,16 +28,32 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
         const result = await response.json();
 
+        // Sembunyikan loader
+        loader.classList.add('hidden');
+
         if (response.ok) {
             Swal.fire({
                 icon: 'success',
                 title: 'Login berhasil!',
-                text: 'Anda akan diarahkan ke halaman dashboard.',
+                text: 'Anda akan diarahkan ke dashboard yang sesuai.',
                 timer: 2000,
                 showConfirmButton: false,
             }).then(() => {
-                // Redirect ke dashboard atau halaman lain
-                window.location.href = 'dashboard.html';
+                // Mengambil data role dari hasil login
+                const role = result.role;
+
+                // Menentukan halaman tujuan berdasarkan role
+                if (role === 'admin') {
+                    window.location.href = 'dashboard-admin.html'; // Arahkan ke dashboard admin
+                } else if (role === 'customer') {
+                    window.location.href = 'dashboard-customer.html'; // Arahkan ke dashboard customer
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Terjadi kesalahan ketika login. Silakan coba lagi.',
+                    });
+                }
             });
         } else {
             Swal.fire({
@@ -43,6 +63,8 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             });
         }
     } catch (error) {
+        // Sembunyikan loader jika ada error
+        loader.classList.add('hidden');
         Swal.fire({
             icon: 'error',
             title: 'Error',
