@@ -49,7 +49,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
             if (userResponse.ok) {
                 // Arahkan berdasarkan role
-                const role = users.role_id;
+                const role = user.role_id;
                 if (role === 1) {
                     window.location.href = 'dashboard-admin.html'; // Admin
                 } else if (role === 2) {
