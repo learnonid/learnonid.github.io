@@ -46,13 +46,13 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             });
 
             // Log the user response for debugging
-            console.log('User response:', userResponse);
+            // console.log('User response:', userResponse);
 
             const user = await userResponse.json();
 
             if (userResponse.ok) {
                 // Arahkan berdasarkan role
-                const role = user.role_id;
+                const role = user.user.role_id;
                 if (role === 1) {
                     window.location.href = 'dashboard-admin.html'; // Admin
                 } else if (role === 2) {
@@ -63,12 +63,6 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                         title: 'Terjadi Kesalahan',
                         text: 'Role tidak dikenali. Silakan coba lagi.',
                     });
-
-                    console.error('Role tidak dikenali:', role);
-                    console.log('User:', user);
-                    console.log('role id:', user.role_id);
-                    console.log('role id:', role);
-                    console.log('role id:', user.user.role_id);
 
                 }
             } else {
