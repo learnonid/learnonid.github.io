@@ -64,9 +64,12 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                         text: 'Role tidak dikenali. Silakan coba lagi.',
                     });
 
-                    console.error('Role tidak dikenali:', user.role_id);
+                    console.error('Role tidak dikenali:', role);
                     console.log('User:', user);
                     console.log('role id:', user.role_id);
+                    console.log('role id:', role);
+                    console.log('role id:', user.user.role_id);
+
                 }
             } else {
                 Swal.fire({
