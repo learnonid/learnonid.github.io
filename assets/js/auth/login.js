@@ -41,7 +41,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`, // Sertakan token di header
+                    Authorization: `${token}`, // Sertakan token di header
                 },
             });
 
@@ -49,7 +49,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
 
             if (userResponse.ok) {
                 // Arahkan berdasarkan role
-                const role = user.role;
+                const role = users.role_id;
                 if (role === 1) {
                     window.location.href = 'dashboard-admin.html'; // Admin
                 } else if (role === 2) {
