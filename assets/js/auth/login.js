@@ -36,6 +36,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             const token = result.token;
             localStorage.setItem('authToken', token);
 
+            // Simpan token ke cookie (exp 1 hari)
+            document.cookie = `authToken=${token}; path=/; secure; samesite=strict; max-age=86400`; // 86400 detik = 1 hari
+
             // Ambil informasi user berdasarkan ID menggunakan token
             const userResponse = await fetch('http://127.0.0.1:3000/u/profile', {
                 method: 'GET',
@@ -45,25 +48,21 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                 },
             });
 
-            // Log the user response for debugging
-            // console.log('User response:', userResponse);
-
             const user = await userResponse.json();
 
             if (userResponse.ok) {
                 // Arahkan berdasarkan role
                 const role = user.user.role_id;
                 if (role === 1) {
-                    window.location.href = 'dashboard-admin.html'; // Admin
+                    window.location.href = '../admin/dashboard.html'; // Admin
                 } else if (role === 2) {
-                    window.location.href = 'dashboard-customer.html'; // Customer
+                    window.location.href = '../customer/dashboard.html'; // Customer
                 } else {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Terjadi Kesalahan',
                         text: 'Role tidak dikenali. Silakan coba lagi.',
                     });
-
                 }
             } else {
                 Swal.fire({
@@ -91,6 +90,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     }
 });
 
+// Fungsi untuk toggle password visibility
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('password');
 
@@ -103,3 +103,16 @@ togglePassword.addEventListener('click', function () {
             ? '<i class="ph ph-eye text-xl text-main-blue"></i>'
             : '<i class="ph ph-eye-slash text-xl text-main-blue"></i>';
 });
+
+// Fungsi untuk mendapatkan cookie berdasarkan nama
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Fungsi untuk menghapus token dari cookie saat logout
+function clearAuthToken() {
+    document.cookie = 'authToken=; path=/; max-age=0'; // Menghapus cookie
+    localStorage.removeItem('authToken'); // Menghapus token dari localStorage
+}
