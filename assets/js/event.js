@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let events = response.events || [];
     let visibleCards = 6;
 
+    // Mendapatkan tanggal hari ini
+    const today = new Date();
+
+    // Mengurutkan acara berdasarkan tanggal terbaru
+    events.sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
+
     // Membuat container untuk kartu acara
     const section = document.createElement('section');
     section.className = 'events-section py-16 px-6';
@@ -44,11 +50,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Event image
             const image = document.createElement('img');
-            image.src = 'assets/img/course_cover.webp';
-
-            if (window.location.href === 'http://127.0.0.1:5500/cust/') {
+            if (window.location.href === 'http://127.0.0.1:5500/cust/' || window.location.href === 'http://127.0.0.1:5500/cust/index.html') {
                 image.src = '../assets/img/course_cover.webp'; // Mengubah src jika sesuai
-            } if (window.location.href === 'https://learnonid.github.io/cust/') {
+            } else if (window.location.href === 'https://learnonid.github.io/cust/' || window.location.href === 'https://learnonid.github.io/cust/index.html') {
                 image.src = '../assets/img/course_cover.webp'; // Mengubah src jika sesuai
             } else {
                 image.src = 'assets/img/course_cover.webp'; // Nilai default jika tidak cocok
@@ -84,6 +88,204 @@ document.addEventListener('DOMContentLoaded', async () => {
             description.className = 'text-sm text-gray-800 mt-2';
             description.textContent = event.description;
             cardContent.appendChild(description);
+
+            // Tambahkan tombol "Daftar" jika berada di URL tertentu dan tanggal acara tidak kurang dari hari ini
+            const eventDate = new Date(event.event_date); // Konversi tanggal acara menjadi objek Date
+            if (window.location.href === 'http://127.0.0.1:5500/cust/' && eventDate >= today) {
+                const registerButton = document.createElement('button');
+                registerButton.className = 'mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
+                registerButton.textContent = 'Daftar';
+                registerButton.addEventListener('click', () => {
+                    showRegistrationForm(event);
+                });
+                cardContent.appendChild(registerButton);
+            } else if (window.location.href === 'https://learnonid.github.io/cust/' && eventDate >= today) {
+                const registerButton = document.createElement('button');
+                registerButton.className = 'mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
+                registerButton.textContent = 'Daftar';
+                registerButton.addEventListener('click', () => {
+                    showRegistrationForm(event);
+                });
+                cardContent.appendChild(registerButton);
+            } else if (window.location.href === 'http://127.0.0.1:5500/cust/index.html' && eventDate >= today) {
+                const registerButton = document.createElement('button');
+                registerButton.className = 'mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
+                registerButton.textContent = 'Daftar';
+                registerButton.addEventListener('click', () => {
+                    showRegistrationForm(event);
+                });
+                cardContent.appendChild(registerButton);
+            } else if (window.location.href === 'https://learnonid.github.io/cust/index.html' && eventDate >= today) {
+                const registerButton = document.createElement('button');
+                registerButton.className = 'mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
+                registerButton.textContent = 'Daftar';
+                registerButton.addEventListener('click', () => {
+                    showRegistrationForm(event);
+                });
+                cardContent.appendChild(registerButton);
+            }
+
+            // Fungsi untuk menampilkan form pendaftaran
+            function showRegistrationForm(event) {
+                // Buat elemen modal untuk pendaftaran
+                const formContainer = document.createElement('div');
+                formContainer.className = 'fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50';
+
+                // Buat elemen form
+                const form = document.createElement('form');
+                form.className = 'bg-white p-8 rounded-lg shadow-lg max-w-lg w-full relative';
+
+                // Tombol close (X)
+                const closeButton = document.createElement('button');
+                closeButton.type = 'button';
+                closeButton.textContent = 'X';
+                closeButton.className = 'absolute top-4 right-4 text-xl font-semibold text-gray-700 hover:text-red-500';
+                closeButton.addEventListener('click', () => {
+                    document.body.removeChild(formContainer); // Menutup modal saat tombol X diklik
+                });
+
+                // Input hidden untuk user_id dan event_id
+                const userIdInput = document.createElement('input');
+                userIdInput.type = 'hidden';
+                userIdInput.name = 'user_id';
+                userIdInput.value = 'USER_ID'; // Ganti dengan ID pengguna yang sesuai
+
+                const eventIdInput = document.createElement('input');
+                eventIdInput.type = 'hidden';
+                eventIdInput.name = 'event_id';
+                eventIdInput.value = event.event_id;
+
+                // Input untuk event_name
+                const eventNameLabel = document.createElement('label');
+                eventNameLabel.textContent = 'Nama Acara';
+                eventNameLabel.className = 'block font-semibold text-gray-700';
+
+                const eventNameInput = document.createElement('input');
+                eventNameInput.type = 'text';
+                eventNameInput.name = 'event_name';
+                eventNameInput.value = event.event_name;
+                eventNameInput.disabled = true; // Tidak bisa diubah oleh pengguna
+                eventNameInput.className = 'mb-4 p-2 w-full border rounded';
+
+                // Pilihan status (Regular atau VIP)
+                const statusLabel = document.createElement('label');
+                statusLabel.textContent = 'Status';
+                statusLabel.className = 'block font-semibold text-gray-700';
+
+                const statusSelect = document.createElement('select');
+                statusSelect.name = 'status';
+                statusSelect.className = 'mb-4 p-2 w-full border rounded';
+
+                const regularOption = document.createElement('option');
+                regularOption.value = 'regular';
+                regularOption.textContent = 'Regular';
+                const vipOption = document.createElement('option');
+                vipOption.value = 'vip';
+                vipOption.textContent = 'VIP';
+
+                statusSelect.appendChild(regularOption);
+                statusSelect.appendChild(vipOption);
+
+                // Tambahkan elemen untuk menampilkan harga
+                const priceLabel = document.createElement('label');
+                priceLabel.textContent = 'Harga: ';
+                priceLabel.className = 'block font-semibold text-gray-700';
+
+                const priceDisplay = document.createElement('span');
+                priceDisplay.className = 'font-bold text-xl text-green-500';
+                priceDisplay.textContent = `Rp ${event.price}`; // Harga default untuk regular
+
+                statusSelect.addEventListener('change', () => {
+                    if (statusSelect.value === 'vip') {
+                        priceDisplay.textContent = `Rp ${event.vip_price}`; // Harga untuk VIP
+                    } else {
+                        priceDisplay.textContent = `Rp ${event.price}`; // Harga untuk Regular
+                    }
+                });
+
+                // Input untuk bukti pembayaran (opsional)
+                const paymentReceiptLabel = document.createElement('label');
+                paymentReceiptLabel.textContent = 'Bukti Pembayaran';
+                paymentReceiptLabel.className = 'block font-semibold text-gray-700';
+
+                const paymentReceiptInput = document.createElement('input');
+                paymentReceiptInput.type = 'file';
+                paymentReceiptInput.name = 'payment_receipt';
+                paymentReceiptInput.className = 'mb-4 p-2 w-full border rounded';
+
+                // Informasi rekening untuk pembayaran
+                const accountInfoContainer = document.createElement('div');
+                accountInfoContainer.className = 'mt-4 p-4 border-t border-gray-300';
+
+                const accountInfoTitle = document.createElement('h3');
+                accountInfoTitle.textContent = 'Informasi Rekening Pembayaran';
+                accountInfoTitle.className = 'text-xl font-semibold';
+
+                const accountInfoText = document.createElement('p');
+                accountInfoText.textContent = 'Silakan lakukan pembayaran ke rekening berikut:';
+
+                const bankInfo = document.createElement('p');
+                bankInfo.textContent = 'Bank ABC: 123-456-7890';
+
+                accountInfoContainer.appendChild(accountInfoTitle);
+                accountInfoContainer.appendChild(accountInfoText);
+                accountInfoContainer.appendChild(bankInfo);
+
+                // Tombol submit
+                const submitButton = document.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.textContent = 'Kirim Pendaftaran';
+                submitButton.className = 'mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full';
+
+                // Gabungkan semua elemen form dengan label
+                form.appendChild(closeButton); // Menambahkan tombol close
+                form.appendChild(userIdInput);
+                form.appendChild(eventIdInput);
+                form.appendChild(eventNameLabel);
+                form.appendChild(eventNameInput);
+                form.appendChild(statusLabel);
+                form.appendChild(statusSelect);
+                form.appendChild(priceLabel);
+                form.appendChild(priceDisplay);
+                form.appendChild(paymentReceiptLabel);
+                form.appendChild(paymentReceiptInput);
+                form.appendChild(accountInfoContainer); // Menambahkan informasi rekening
+                form.appendChild(submitButton);
+
+                formContainer.appendChild(form);
+
+                // Tambahkan formContainer ke body
+                document.body.appendChild(formContainer);
+
+                // Kirim form ke backend (misalnya dengan fetch)
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+                    const data = Object.fromEntries(formData.entries());
+
+                    fetch('http://localhost:8080/api/registrations', {  // Sesuaikan dengan URL endpoint backend
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        alert('Pendaftaran berhasil!');
+                        // Handle hasil sukses
+                    })
+                    .catch(error => {
+                        alert('Terjadi kesalahan saat pendaftaran');
+                        // Handle error
+                    });
+                });
+            }
+
+
+
+
 
             card.appendChild(cardContent);
             cardsWrapper.appendChild(card);

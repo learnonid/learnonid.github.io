@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['Offline', 'pelatihan-offline.html'],
       ]],
       ['Buku', 'buku.html'],
-      ['Tentang', 'tentang.html'],
+      ['Benefit', 'benefit.html'],
     ];
   
     const navContainer = document.getElementById('navigation');
