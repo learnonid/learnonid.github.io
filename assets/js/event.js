@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const title = document.createElement('h2');
     title.className = 'text-3xl font-bold mb-8 text-center';
-    title.textContent = 'Acara yang Telah Terlaksana';
+    title.textContent = 'Kursus dan Acara';
     section.appendChild(title);
 
     const cardsWrapper = document.createElement('div');
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Event image
             const image = document.createElement('img');
-            image.src = event.event_image;
+            image.src = 'assets/img/course_cover.webp';
             image.alt = event.event_name;
             image.className = 'w-full h-40 object-cover';
             card.appendChild(image);
