@@ -56,7 +56,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                 if (role === 1) {
                     window.location.href = '../admin/dashboard.html'; // Admin
                 } else if (role === 2) {
-                    window.location.href = '../customer/dashboard.html'; // Customer
+                    window.location.href = '../cust/'; // Customer
                 } else {
                     Swal.fire({
                         icon: 'warning',

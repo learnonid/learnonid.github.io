@@ -45,6 +45,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Event image
             const image = document.createElement('img');
             image.src = 'assets/img/course_cover.webp';
+
+            if (window.location.href === 'http://127.0.0.1:5500/cust/') {
+                image.src = '../assets/img/course_cover.webp'; // Mengubah src jika sesuai
+            } if (window.location.href === 'https://learnonid.github.io/cust/') {
+                image.src = '../assets/img/course_cover.webp'; // Mengubah src jika sesuai
+            } else {
+                image.src = 'assets/img/course_cover.webp'; // Nilai default jika tidak cocok
+            }
             image.alt = event.event_name;
             image.className = 'w-full h-40 object-cover';
             card.appendChild(image);

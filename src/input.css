@@ -10,4 +10,12 @@
     .btn-login:hover {
         @apply bg-white text-main-blue-darker italic duration-300;
     }
+
+    .btn-logout {
+        @apply bg-transparent px-6 py-2 border border-red-600 rounded-lg text-red-600 duration-300 font-semibold;
+    }
+
+    .btn-logout:hover {
+        @apply bg-red-700 text-white italic duration-300;
+    }
 }
