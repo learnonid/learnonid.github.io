@@ -77,15 +77,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             price.textContent = `Harga: Rp${book.price.toLocaleString('id-ID')}`;
             cardContent.appendChild(price);
     
-            // Periksa apakah token tersedia di cookie
-            const token = getCookie('Authorization');
-            if (token) {
-                const purchaseButton = document.createElement('button');
-                purchaseButton.className = 'bg-blue-500 text-white py-2 px-4 rounded mt-4 hover:bg-blue-600';
-                purchaseButton.textContent = 'Beli Buku';
-                purchaseButton.addEventListener('click', () => showPurchaseForm(book));
-                cardContent.appendChild(purchaseButton);
-            }
+            // Tampilkan tombol pembelian hanya jika token ada di cookie
+            showPurchaseButtonIfTokenExists(cardContent, book);
     
             card.appendChild(cardContent);
             cardsWrapper.appendChild(card);
@@ -106,17 +99,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
+    
     // Fungsi untuk mendapatkan nilai cookie berdasarkan nama
     function getCookie(name) {
+        console.log(`Mencoba mengambil cookie: ${name}`);
         const cookies = document.cookie.split(';').map(cookie => cookie.trim());
         for (const cookie of cookies) {
             const [key, value] = cookie.split('=');
             if (key === name) {
+                // console.log(`Cookie ditemukan: ${name}=${decodeURIComponent(value)}`);
                 return decodeURIComponent(value);
             }
         }
+        // console.log(`Cookie tidak ditemukan: ${name}`);
         return null;
     }
+    
+
+    function showPurchaseButtonIfTokenExists(cardContent, book) {
+        // Fungsi untuk mendapatkan token dari cookie
+        const token = getCookie('authToken'); // Pastikan nama cookie sesuai
+        if (token) {
+            // Buat tombol pembelian jika token ada
+            const purchaseButton = document.createElement('button');
+            purchaseButton.className = 'bg-blue-500 text-white py-2 px-4 rounded mt-4 hover:bg-blue-600';
+            purchaseButton.textContent = 'Beli Buku';
+            purchaseButton.addEventListener('click', () => showPurchaseForm(book));
+            cardContent.appendChild(purchaseButton);
+        }
+    }    
     
 
     // Fungsi untuk menampilkan form pembelian
