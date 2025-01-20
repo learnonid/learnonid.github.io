@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const userIdInput = document.createElement('input');
                 userIdInput.type = 'hidden';
                 userIdInput.name = 'user_id';
-                userIdInput.value = 'USER_ID'; // Ganti dengan ID pengguna yang sesuai
+                userIdInput.value = localStorage.getItem('userId'); // Mengambil userId dari localStorage
 
                 const eventIdInput = document.createElement('input');
                 eventIdInput.type = 'hidden';
@@ -160,12 +160,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 eventNameLabel.textContent = 'Nama Acara';
                 eventNameLabel.className = 'block font-semibold text-gray-700';
 
+                // Gunakan input dengan readonly agar tetap terisi dan bisa terkirim ke server
                 const eventNameInput = document.createElement('input');
                 eventNameInput.type = 'text';
                 eventNameInput.name = 'event_name';
                 eventNameInput.value = event.event_name;
-                eventNameInput.disabled = true; // Tidak bisa diubah oleh pengguna
+                eventNameInput.readOnly = true;  // Digunakan agar tetap terisi dan bisa terkirim
                 eventNameInput.className = 'mb-4 p-2 w-full border rounded';
+                form.appendChild(eventNameInput);
 
                 // Pilihan status (Regular atau VIP)
                 const statusLabel = document.createElement('label');
@@ -195,13 +197,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 priceDisplay.className = 'font-bold text-xl text-green-500';
                 priceDisplay.textContent = `Rp ${event.price}`; // Harga default untuk regular
 
+                // Tambahkan input hidden untuk harga
+                const priceInput = document.createElement('input');
+                priceInput.type = 'hidden';
+                priceInput.name = 'price'; // Nama untuk data harga
+                form.appendChild(priceInput);
+
+                // Tambahkan event listener untuk update harga
                 statusSelect.addEventListener('change', () => {
                     if (statusSelect.value === 'vip') {
                         priceDisplay.textContent = `Rp ${event.vip_price}`; // Harga untuk VIP
+                        priceInput.value = event.vip_price; // Set harga VIP ke input hidden
                     } else {
                         priceDisplay.textContent = `Rp ${event.price}`; // Harga untuk Regular
+                        priceInput.value = event.price; // Set harga regular ke input hidden
                     }
                 });
+
+                // Set harga awal untuk regular
+                priceInput.value = event.price;
 
                 // Input untuk bukti pembayaran (opsional)
                 const paymentReceiptLabel = document.createElement('label');
@@ -257,28 +271,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Tambahkan formContainer ke body
                 document.body.appendChild(formContainer);
 
-                // Kirim form ke backend (misalnya dengan fetch)
+                // Kirim form ke backend dengan FormData
                 form.addEventListener('submit', (event) => {
-                    event.preventDefault();
-
-                    const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
-
-                    fetch('http://localhost:8080/api/registrations', {  // Sesuaikan dengan URL endpoint backend
+                    event.preventDefault();  // Mencegah form submit default
+                
+                    const formData = new FormData(form);  // Membuat objek FormData dari form
+                
+                    // Kirim form data ke server
+                    fetch('http://localhost:3000/file/upload', {
                         method: 'POST',
-                        body: JSON.stringify(data),
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        body: formData,
                     })
                     .then(response => response.json())
                     .then(result => {
-                        alert('Pendaftaran berhasil!');
-                        // Handle hasil sukses
+                        if (result.message === "File uploaded and registration saved successfully") {
+                            // Menampilkan SweetAlert saat pendaftaran berhasil
+                            Swal.fire({
+                                title: 'Pendaftaran Berhasil!',
+                                text: 'Data telah terkirim dengan sukses.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Menutup form modal setelah sukses
+                                document.body.removeChild(formContainer); 
+                            });
+                        } else {
+                            // Menampilkan SweetAlert jika terjadi kesalahan
+                            Swal.fire({
+                                title: 'Terjadi Kesalahan!',
+                                text: 'Pendaftaran gagal. Coba lagi.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
                     })
                     .catch(error => {
-                        alert('Terjadi kesalahan saat pendaftaran');
-                        // Handle error
+                        // Menampilkan SweetAlert jika ada kesalahan saat pengiriman
+                        Swal.fire({
+                            title: 'Terjadi Kesalahan!',
+                            text: 'Terjadi kesalahan saat pendaftaran. Coba lagi.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                        console.error('Error:', error);
                     });
                 });
             }

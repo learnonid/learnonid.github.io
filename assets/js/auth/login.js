@@ -51,6 +51,15 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             const user = await userResponse.json();
 
             if (userResponse.ok) {
+                console.log(user); // Log data yang diterima untuk memeriksa struktur
+            
+                const userId = user.user.user_id; // Akses user_id dari data
+                if (userId) {
+                    localStorage.setItem('userId', userId); // Simpan user ID ke localStorage
+                } else {
+                    console.error('User ID tidak ditemukan');
+                }
+            
                 // Arahkan berdasarkan role
                 const role = user.user.role_id;
                 if (role === 1) {
@@ -70,7 +79,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                     title: 'Error',
                     text: 'Gagal mendapatkan informasi pengguna.',
                 });
-            }
+            }                   
         } else {
             Swal.fire({
                 icon: 'error',
@@ -115,4 +124,6 @@ function getCookie(name) {
 function clearAuthToken() {
     document.cookie = 'authToken=; path=/; max-age=0'; // Menghapus cookie
     localStorage.removeItem('authToken'); // Menghapus token dari localStorage
+    localStorage.removeItem('userId'); // Menghapus user ID dari localStorage
+    localStorage.clear();
 }
