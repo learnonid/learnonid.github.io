@@ -1,83 +1,152 @@
-// Example of table row data
-const tableData = [
-    {
-        eventId: "E001",
-        userName: "John Doe",
-        status: "Reguler",
-        paymentProof: "receipt.jpg",
-        benefit: null,
-    },
-    {
-        eventId: "E002",
-        userName: "Jane Smith",
-        status: "VIP",
-        paymentProof: "payment.pdf",
-        benefit: "vip-benefit.pdf",
-    },
-    {
-        eventId: "Asl1",
-        userName: "Udin",
-        status: "VIP",
-        paymentProof: "Bukti-Pembayaran.jpeg",
-        benefit: null,
-    },
-    {
-        eventId: "x0Re",
-        userName: "Budi",
-        status: "Reguler",
-        paymentProof: "Bayar.jpeg",
-        benefit: null,
-    },
-];
+document.addEventListener('DOMContentLoaded', async () => {
+    const registrationsContainer = document.getElementById('registrations');
+    const userNameContainer = document.getElementById('user-name'); // Tempat untuk menampilkan nama pengguna
 
-// Populate table
-const tableBody = document.getElementById("registrationTableBody");
-tableData.forEach((data, index) => {
-    const row = document.createElement("tr");
+    // URL endpoint untuk mengambil semua data pengguna
+    const registrationsEndpoint = 'http://localhost:3000/uer/all'; // Ganti dengan endpoint yang sesuai
+    const userEndpoint = 'http://localhost:3000/user/detail'; // Ganti dengan endpoint untuk mengambil nama user berdasarkan ID
 
-    row.innerHTML = `
-        <td class="px-6 py-3">${data.eventId}</td>
-        <td class="px-6 py-3">${data.userName}</td>
-        <td class="px-6 py-3">${data.status}</td>
-        <td class="px-6 py-3">
-            <a href="/uploads/${data.paymentProof}" target="_blank" class="text-blue-500 underline">${data.paymentProof}</a>
-        </td>
-        <td class="px-6 py-3">
-            ${
-                data.benefit
-                    ? `<a href="/uploads/${data.benefit}" target="_blank" class="text-blue-500 underline">${data.benefit}</a>`
-                    : `<button class="bg-gray-500 text-white px-3 py-1 rounded benefit-btn" data-index="${index}">Add Benefit</button>`
+    // Fungsi untuk mengambil data registrasi pengguna dari API
+    async function fetchRegistrations() {
+        try {
+            const token = localStorage.getItem('authToken'); // Token untuk autentikasi
+
+            if (!token) {
+                console.error('Token not found in localStorage');
+                return [];
             }
-        </td>
-        <td class="px-6 py-3">
-            <button class="bg-red-500 text-white px-3 py-1 rounded reject-btn" data-index="${index}">Reject</button>
-        </td>
-    `;
-    tableBody.appendChild(row);
-});
 
-// Modal Logic
-const benefitModal = document.getElementById("benefitModal");
-const benefitForm = document.getElementById("benefitForm");
-const cancelBenefit = document.getElementById("cancelBenefit");
+            const response = await fetch(registrationsEndpoint, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}` // Menambahkan token ke header
+                }
+            });
 
-document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("benefit-btn")) {
-        benefitModal.classList.remove("hidden");
-    } else if (e.target.classList.contains("reject-btn")) {
-        const index = e.target.dataset.index;
-        tableData[index].status = "Rejected";
-        alert("User status updated to Rejected");
-        location.reload(); // Reload page for simplicity
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch registration data:', error);
+            return [];
+        }
     }
-});
 
-cancelBenefit.addEventListener("click", () => {
-    benefitModal.classList.add("hidden");
-});
+    // Fungsi untuk mengambil nama pengguna berdasarkan ID
+    async function fetchUserName(userId) {
+        try {
+            const token = localStorage.getItem('authToken'); // Token untuk autentikasi
 
-benefitForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    alert("Benefit added successfully!");
-    benefitModal.classList.add("hidden");
+            if (!token) {
+                console.error('Token not found in localStorage');
+                return '';
+            }
+
+            const response = await fetch(`${userEndpoint}/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}` // Menambahkan token ke header
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.user.full_name; // Mengembalikan nama lengkap pengguna dari respons
+        } catch (error) {
+            console.error('Failed to fetch user name:', error);
+            return '';
+        }
+    }
+
+    // Mendapatkan userId dari localStorage
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        console.error('User ID not found in localStorage');
+        return;
+    }
+
+    // Ambil nama pengguna dan tampilkan di halaman
+    const full_name = await fetchUserName(userId);
+    if (userNameContainer) {
+        userNameContainer.textContent = `Hello, ${full_name || 'User'}`; // Tampilkan nama pengguna
+    }
+
+    // Ambil data registrasi dan tampilkan
+    let response = await fetchRegistrations();
+    let registrations = response || [];
+
+    // Membuat elemen tabel
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'overflow-x-auto bg-white shadow-md rounded-lg justify-center mx-4';
+
+    const table = document.createElement('table');
+    table.className = 'min-w-full table-auto justify-center';
+
+    // Header tabel dengan kolom nama pengguna
+    const thead = document.createElement('thead');
+    thead.className = 'bg-main-blue text-white';
+    thead.innerHTML = `
+        <tr>
+            <th class="px-6 py-3 text-left">User Name</th>
+            <th class="px-6 py-3 text-left">Event Name</th>
+            <th class="px-6 py-3 text-left">Status</th>
+            <th class="px-6 py-3 text-left">Price</th>
+            <th class="px-6 py-3 text-left">Registration Date</th>
+            <th class="px-6 py-3 text-left">Materi File</th>
+            <th class="px-6 py-3 text-left">Sertifikat File</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+
+    // Body tabel
+    const tbody = document.createElement('tbody');
+    if (registrations.length === 0) {
+        const noDataRow = document.createElement('tr');
+        noDataRow.className = 'text-center';
+        noDataRow.innerHTML = `
+            <td colspan="7" class="px-6 py-4 text-gray-500">No registrations found</td>
+        `;
+        tbody.appendChild(noDataRow);
+    } else {
+        registrations.forEach(async registration => {
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+
+            // Menampilkan materi file atau input jika tidak ada
+            const materiFile = registration.materi_file ? 
+                `<a href="${registration.materi_file}" target="_blank" class="text-blue-500">Lihat Materi</a>` : 
+                `<input type="file" class="text-blue-500" id="materi-file-${registration._id}" name="materi-file" />`;
+
+            // Menampilkan sertifikat file atau input jika tidak ada
+            const sertifikatFile = registration.sertifikat_file ? 
+                `<a href="${registration.sertifikat_file}" target="_blank" class="text-blue-500">Lihat Sertifikat</a>` : 
+                `<input type="file" class="text-blue-500" id="sertifikat-file-${registration._id}" name="sertifikat-file" />`;
+
+            // Mengambil nama pengguna untuk setiap baris
+            const full_name = registration.user_id ? await fetchUserName(registration.user_id) : 'N/A';
+
+            row.innerHTML = `
+                <td class="px-6 py-4">${full_name}</td>
+                <td class="px-6 py-4">${registration.event_name || 'N/A'}</td>
+                <td class="px-6 py-4">${registration.status}</td>
+                <td class="px-6 py-4">Rp${registration.price.toLocaleString('id-ID')}</td>
+                <td class="px-6 py-4">${new Date(registration.registration_date).toLocaleString()}</td>
+                <td class="px-6 py-4">${materiFile}</td>
+                <td class="px-6 py-4">${sertifikatFile}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+    registrationsContainer.appendChild(tableWrapper);
 });
