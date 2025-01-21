@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnOn</title>
+    <link rel="shortcut icon" href="../assets/img/favicon.jpeg" type="image/x-icon">
+    
+    <script defer src="../assets/js/nav-user.js"></script>
+    <script defer src="../assets/js/nav-user-mobile.js"></script>
+    <!-- <script defer src="../assets/js/hero.js"></script> -->
+    <script defer src="../assets/js/ol-event.js"></script>
+    <script defer src="../assets/js/footer.js"></script>
+
+    <link rel="stylesheet" href="../src/output.css">
+    <link rel="stylesheet" href="../assets/css/animate.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/loader.css">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<body>
+    <!-- Loader (disembunyikan secara default) -->
+    <div id="loader" class="loader hidden">
+        <i class="ph ph-spinner-gap text-main-blue-darker font-bold"></i> <!-- Bisa pakai ikon spinner dari Phosphor -->
+    </div>
+
+    <nav id="navigation" class="sticky top-0 z-50"></nav>
+    <div id="mobile-nav" class="sticky top-0 z-50"></div>
+    <!-- <div id="hero"></div> -->
+    <div id="events"></div>
+
+    <div id="footer"></div>
+
+    <script>
+        // Tampilkan loader saat halaman mulai memuat
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            
+            // Tampilkan loader
+            loader.classList.remove('hidden');
+
+            // Simulasikan waktu loading
+            setTimeout(() => {
+                // Setelah loading selesai, sembunyikan loader
+                loader.classList.add('hidden');
+            }, 3000); // Durasi loader 3 detik (ganti dengan durasi sebenarnya sesuai kebutuhan)
+        });
+    </script>
+
+    <!-- <script src="registerEvent.js"></script> -->
+
+</body>
+</html>
