@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // URL endpoint untuk mengambil semua data pengguna
     const registrationsEndpoint = 'http://localhost:3000/uer/all'; // Ganti dengan endpoint yang sesuai
     const userEndpoint = 'http://localhost:3000/user/detail'; // Ganti dengan endpoint untuk mengambil nama user berdasarkan ID
+    const updateEndpoint = 'http://localhost:3000/uer/update'; // Ganti dengan endpoint untuk update data registrasi
 
     // Fungsi untuk mengambil data registrasi pengguna dari API
     async function fetchRegistrations() {
@@ -100,8 +101,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             <th class="px-6 py-3 text-left">Status</th>
             <th class="px-6 py-3 text-left">Price</th>
             <th class="px-6 py-3 text-left">Registration Date</th>
-            <th class="px-6 py-3 text-left">Materi File</th>
-            <th class="px-6 py-3 text-left">Sertifikat File</th>
+            <th class="py-3 text-left">Materi File</th>
+            <th class="py-3 text-left">Sertifikat File</th>
+            <th class="px-6 py-3 text-left">Action</th>
         </tr>
     `;
     table.appendChild(thead);
@@ -119,34 +121,136 @@ document.addEventListener('DOMContentLoaded', async () => {
         registrations.forEach(async registration => {
             const row = document.createElement('tr');
             row.className = 'border-b';
-
+        
             // Menampilkan materi file atau input jika tidak ada
             const materiFile = registration.materi_file ? 
                 `<a href="${registration.materi_file}" target="_blank" class="text-blue-500">Lihat Materi</a>` : 
-                `<input type="file" class="text-blue-500" id="materi-file-${registration._id}" name="materi-file" />`;
-
+                `<input type="file" class="text-blue-500" id="materi-file-${registration.registration_id}" name="materi-file" />`;
+        
             // Menampilkan sertifikat file atau input jika tidak ada
             const sertifikatFile = registration.sertifikat_file ? 
                 `<a href="${registration.sertifikat_file}" target="_blank" class="text-blue-500">Lihat Sertifikat</a>` : 
-                `<input type="file" class="text-blue-500" id="sertifikat-file-${registration._id}" name="sertifikat-file" />`;
-
+                `<input type="file" class="text-blue-500" id="sertifikat-file-${registration.registration_id}" name="sertifikat-file" />`;
+        
             // Mengambil nama pengguna untuk setiap baris
             const full_name = registration.user_id ? await fetchUserName(registration.user_id) : 'N/A';
+        
+            // Cek jika event_id ada dan valid, jika tidak, jangan tampilkan tombol update
+            const eventID = registration.event_id;
+            if (!eventID) {
+                console.error('Event ID is missing or invalid');
+                return;
+            }
 
+            // Cek jika id registrasi ada
+            const registrationID = registration.registration_id;
+            if (!registrationID) {
+                console.error('Registration ID is missing or invalid');
+                return;
+            }
+        
+            // Tombol Update - jika event ID ada
+            const updateButton = `<button class="px-4 py-2 text-white bg-blue-500 rounded-lg" onclick="updateRegistration('${registration.registration_id}', '${eventID}')">Update</button>`;
+        
             row.innerHTML = `
                 <td class="px-6 py-4">${full_name}</td>
                 <td class="px-6 py-4">${registration.event_name || 'N/A'}</td>
                 <td class="px-6 py-4">${registration.status}</td>
                 <td class="px-6 py-4">Rp${registration.price.toLocaleString('id-ID')}</td>
                 <td class="px-6 py-4">${new Date(registration.registration_date).toLocaleString()}</td>
-                <td class="px-6 py-4">${materiFile}</td>
-                <td class="px-6 py-4">${sertifikatFile}</td>
+                <td class="py-4">${materiFile}</td>
+                <td class="py-4">${sertifikatFile}</td>
+                <td class="px-6 py-4">${updateButton}</td>
             `;
             tbody.appendChild(row);
-        });
+        });              
     }
 
     table.appendChild(tbody);
     tableWrapper.appendChild(table);
     registrationsContainer.appendChild(tableWrapper);
 });
+
+// Fungsi untuk melakukan pembaruan registrasi
+async function updateRegistration(registrationId, eventId, registration) {
+    try {
+        const token = localStorage.getItem('authToken');
+        const materiFileInput = document.getElementById(`materi-file-${registrationId}`);
+        const sertifikatFileInput = document.getElementById(`sertifikat-file-${registrationId}`);
+        
+        // Pastikan file dipilih
+        const materiFile = materiFileInput ? materiFileInput.files[0] : null;
+        const sertifikatFile = sertifikatFileInput ? sertifikatFileInput.files[0] : null;
+
+        if (!materiFile && !sertifikatFile) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No files selected',
+                text: 'Please select at least one file to upload.',
+            });
+            return;
+        }
+
+        // Ambil data registrasi dari endpoint
+        const response = await fetch(`http://localhost:3000/uer/${registrationId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to Fetch Data',
+                text: 'Could not retrieve registration data.',
+            });
+            return;
+        }
+
+        const data = await response.json();
+        const { price, event_name, status } = data;
+
+        // Siapkan FormData
+        const formData = new FormData();
+        if (materiFile) formData.append('materi_file', materiFile);
+        if (sertifikatFile) formData.append('sertifikat_file', sertifikatFile);
+        formData.append('price', price);
+        formData.append('event_name', event_name);
+        formData.append('status', status);
+
+        // Kirim permintaan PUT
+        const updateResponse = await fetch(`http://localhost:3000/uer/update/${registrationId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `${token}`,
+            },
+            body: formData,
+        });
+
+        console.log('Response Status:', updateResponse.status);
+        console.log('Response Text:', await updateResponse.text());
+
+        if (updateResponse.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Registration Updated',
+                text: 'File Benefit berhasil ditambahkan.',
+            });
+            window.location.reload();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: 'Gagal menambahkan file benefit.',
+            });
+        }
+    } catch (error) {
+        console.error('Error while updating registration:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'An error occurred',
+            text: 'An unexpected error occurred while updating the registration.',
+        });
+    }
+}
