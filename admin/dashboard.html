@@ -104,9 +104,39 @@
             </div>
 
             <!-- Tabel Events -->
-            <div id="registrations" class="container mx-auto py-8"></div>
+            <div class="p-6">
+                <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
+                    <table class="min-w-full table-auto text-left text-sm">
+                        <thead class="bg-main-blue text-white">
+                            <tr>
+                                <th class="px-6 py-3 text-left">User Name</th>
+                                <th class="px-6 py-3 text-left">Event Name</th>
+                                <th class="px-6 py-3 text-left">Status</th>
+                                <th class="px-6 py-3 text-left">Price</th>
+                                <th class="px-6 py-3 text-left">Registration Date</th>
+                                <th class="px-6 py-3 text-left">Bukti Transfer</th>
+                                <th class="px-6 py-3 text-left">Materi File</th>
+                                <th class="px-6 py-3 text-left">Sertifikat File</th>
+                                <th class="px-6 py-3 text-left">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrations">
+                            <!-- Data acara akan dimasukkan di sini melalui JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination Controls -->
+                <div class="flex justify-between items-center mt-4">
+                    <button id="prevPage" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" disabled>Previous</button>
+                    <span id="paginationInfo" class="text-sm text-gray-700"></span>
+                    <button id="nextPage" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" disabled>Next</button>
+                </div>
+            </div>
+            
+            </div>
+            
         
-        </div>
+        </div>     
 
     </div>
     
