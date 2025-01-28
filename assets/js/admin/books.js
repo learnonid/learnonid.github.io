@@ -26,12 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch books: ' + response.statusText);
+                throw new Error(`Failed to fetch books: ${response.statusText}`);
             }
 
             const responseData = await response.json();
             const books = responseData.books || [];
-            totalBooks = responseData.books.length; // Update totalBooks dynamically from response
+            totalBooks = books.length; // Update totalBooks dynamically from response
 
             const paginatedBooks = paginate(books, page, itemsPerPage);
             populateBooksTable(paginatedBooks);
@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePaginationControls();
         } catch (error) {
             console.error('Error fetching books:', error);
+            alert('Gagal memuat data buku. Silakan coba lagi.');
         }
     }
 
@@ -69,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="px-6 py-4">${formatRupiah(book.price || 0)}</td>
                 <td class="px-6 py-4 flex gap-2">
                     <button class="bg-blue-500 text-white p-2 rounded hover:bg-blue-700" onclick="editBook('${book.book_id}')">
-                        <i class="ph ph-pencil-simple"></i>
+                        Edit
                     </button>
                     <button class="bg-red-500 text-white p-2 rounded hover:bg-red-700" onclick="deleteBook('${book.book_id}')">
-                        <i class="ph ph-trash"></i>
+                        Delete
                     </button>
                 </td>
             `;
@@ -113,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookModal = document.getElementById('bookModal');
     const cancelButton = document.getElementById('cancelButton');
     const bookForm = document.getElementById('bookForm');
-    const updateButton = document.getElementById('updateButton'); // Update button
+    const updateButton = document.getElementById('updateButton');
 
     let editingBookId = null;
 
@@ -121,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     newBookButton.addEventListener('click', () => {
         bookModal.classList.remove('hidden');
         editingBookId = null;
-        updateButton.textContent = 'Create'; // Set to Create Book
+        updateButton.textContent = 'Create';
         bookForm.reset();
     });
 
@@ -130,25 +131,18 @@ document.addEventListener('DOMContentLoaded', () => {
         bookModal.classList.add('hidden');
     });
 
-    // Handle form submission for both create and update
+    // Handle form submission
     bookForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(bookForm);
         const bookData = Object.fromEntries(formData.entries());
     
-        // Convert price to number and add missing fields
-        bookData.price = parseFloat(bookData.price); // Ensure it's a number
+        // Konversi year dan price ke tipe data yang sesuai
+        bookData.year = parseInt(bookData.year || 0); // Pastikan year adalah integer
+        bookData.price = parseFloat(bookData.price || 0); // Pastikan price adalah float
     
-        // If editing an existing book, retain the _id and created_at fields
-        if (editingBookId) {
-            bookData._id = { "$oid": editingBookId }; // Use editingBookId to form the _id
-            bookData.created_at = { "$date": new Date().toISOString() }; // Set the created_at timestamp
-        }
-    
-        console.log(bookData); // Log the formatted data
-    
-        if (!bookData.book_name || !bookData.author || !bookData.price) {
-            Swal.fire('Error', 'Please fill in all required fields!', 'error');
+        if (!bookData.book_name || !bookData.author || isNaN(bookData.year) || isNaN(bookData.price)) {
+            Swal.fire('Error', 'Please fill in all required fields correctly!', 'error');
             return;
         }
     
@@ -167,24 +161,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     
             if (!response.ok) {
-                throw new Error('Failed to save book');
+                const errorMessage = await response.text();
+                throw new Error(errorMessage || 'Failed to save book');
             }
     
             Swal.fire('Success', 'Book saved successfully', 'success').then(() => {
-                window.location.reload();
+                fetchBooks(currentPage);
+                bookModal.classList.add('hidden');
             });
-    
-            bookModal.classList.add('hidden');
-            bookForm.reset();
         } catch (error) {
-            console.error(error);
+            console.error('Error saving book:', error);
             Swal.fire('Error', error.message, 'error');
         }
-    });
-    
+    }); 
 
     // Edit Book
-    window.editBook = async function(bookId) {
+    window.editBook = async function (bookId) {
         try {
             const response = await fetch(`http://127.0.0.1:3000/book/detail/${bookId}`);
             if (!response.ok) {
@@ -197,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
             editingBookId = bookId;
             updateButton.textContent = 'Update';
 
-            // Populate form fields
             document.getElementById('book_name').value = book.book_name;
             document.getElementById('author').value = book.author;
             document.getElementById('publisher').value = book.publisher;
@@ -209,11 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
             bookModal.classList.remove('hidden');
         } catch (error) {
             console.error('Error fetching book details:', error);
+            Swal.fire('Error', 'Failed to fetch book details', 'error');
         }
     };
 
     // Delete Book
-    window.deleteBook = async function(bookId) {
+    window.deleteBook = async function (bookId) {
         const confirmation = await Swal.fire({
             title: 'Delete Book?',
             text: 'You will not be able to recover this data!',
