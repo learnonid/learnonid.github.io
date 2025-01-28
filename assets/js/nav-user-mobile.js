@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ['Offline', 'pelatihan-offline.html', 'ph ph-map-pin'],
       ['Buku', 'buku.html', 'ph ph-book'],
       ['Benefit', 'benefit.html', 'ph ph-gift'],
+      ['Hisory', 'history.html', 'ph ph-bookmark'],
     ];
   
     const navContainer = document.getElementById('mobile-nav');
