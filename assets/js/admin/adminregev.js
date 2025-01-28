@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <th class="px-6 py-3 text-left">Status</th>
             <th class="px-6 py-3 text-left">Price</th>
             <th class="px-6 py-3 text-left">Registration Date</th>
+            <th class="px-6 py-3 text-left">Bukti Transfer</th>
             <th class="py-3 text-left">Materi File</th>
             <th class="py-3 text-left">Sertifikat File</th>
             <th class="px-6 py-3 text-left">Action</th>
@@ -125,6 +126,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Menampilkan materi file atau input jika tidak ada
             const materiFile = registration.materi_file ? 
                 `<a href="${registration.materi_file}" target="_blank" class="text-blue-500">Lihat Materi</a>` : 
+                `<input type="file" class="text-blue-500" id="materi-file-${registration.registration_id}" name="materi-file" />`;
+
+            const paymentReceipt = registration.payment_receipt ? 
+                `<a href="${registration.payment_receipt}" target="_blank" class="text-blue-500">Bukti Transfer</a>` : 
                 `<input type="file" class="text-blue-500" id="materi-file-${registration.registration_id}" name="materi-file" />`;
         
             // Menampilkan sertifikat file atau input jika tidak ada
@@ -151,13 +156,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         
             // Tombol Update - jika event ID ada
             const updateButton = `<button class="px-4 py-2 text-white bg-blue-500 rounded-lg" onclick="updateRegistration('${registration.registration_id}', '${eventID}')">Update</button>`;
+
+            // Elemen status sebagai dropdown dengan opsi tambahan "Reject"
+            const statusOptions = `
+                <select id="status-${registration.registration_id}" class="border rounded px-2 py-1">
+                    <option value="${registration.status}" selected>${registration.status}</option>
+                    <option value="reguler">Reguler</option>
+                    <option value="vip">VIP</option>
+                    <option value="reject">Reject</option>
+                </select>
+            `;
         
             row.innerHTML = `
                 <td class="px-6 py-4">${full_name}</td>
                 <td class="px-6 py-4">${registration.event_name || 'N/A'}</td>
-                <td class="px-6 py-4">${registration.status}</td>
-                <td class="px-6 py-4">Rp${registration.price.toLocaleString('id-ID')}</td>
+                <td class="px-6 py-4">${statusOptions}</td>
+                <td class="px-6 py-4" id="price-${registration.registration_id}">Rp${registration.price.toLocaleString('id-ID')}</td>
                 <td class="px-6 py-4">${new Date(registration.registration_date).toLocaleString()}</td>
+                <td class="px-6 py-4">${paymentReceipt}</td>
                 <td class="py-4">${materiFile}</td>
                 <td class="py-4">${sertifikatFile}</td>
                 <td class="px-6 py-4">${updateButton}</td>
@@ -177,47 +193,34 @@ async function updateRegistration(registrationId, eventId, registration) {
         const token = localStorage.getItem('authToken');
         const materiFileInput = document.getElementById(`materi-file-${registrationId}`);
         const sertifikatFileInput = document.getElementById(`sertifikat-file-${registrationId}`);
-        
-        // Pastikan file dipilih
+        const statusSelect = document.getElementById(`status-${registrationId}`); // Ambil status dari dropdown
+        const eventName = document.getElementById(`event-name-${registrationId}`); // Ambil nama event
+
+        // File input (opsional)
         const materiFile = materiFileInput ? materiFileInput.files[0] : null;
         const sertifikatFile = sertifikatFileInput ? sertifikatFileInput.files[0] : null;
 
-        if (!materiFile && !sertifikatFile) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'No files selected',
-                text: 'Please select at least one file to upload.',
-            });
-            return;
-        }
+        // Ambil nilai harga dalam format Rupiah dan ubah ke float
+        const priceElement = document.querySelector(`#price-${registrationId}`); // Ambil elemen harga
+        const formattedPrice = priceElement.textContent.replace(/[Rp.,\s]/g, ''); // Hapus format Rupiah
+        const price = parseFloat(formattedPrice);
 
-        // Ambil data registrasi dari endpoint
-        const response = await fetch(`http://localhost:3000/uer/${registrationId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `${token}`,
-            },
-        });
-
-        if (!response.ok) {
+        if (isNaN(price)) {
             Swal.fire({
                 icon: 'error',
-                title: 'Failed to Fetch Data',
-                text: 'Could not retrieve registration data.',
+                title: 'Invalid Price',
+                text: 'Harga tidak valid. Pastikan nilainya berupa angka.',
             });
             return;
         }
-
-        const data = await response.json();
-        const { price, event_name, status } = data;
 
         // Siapkan FormData
         const formData = new FormData();
         if (materiFile) formData.append('materi_file', materiFile);
         if (sertifikatFile) formData.append('sertifikat_file', sertifikatFile);
-        formData.append('price', price);
-        formData.append('event_name', event_name);
-        formData.append('status', status);
+        formData.append('status', statusSelect.value); // Tambahkan status baru
+        formData.append('event_name', eventName);
+        formData.append('price', price); // Tambahkan harga sebagai float
 
         // Kirim permintaan PUT
         const updateResponse = await fetch(`http://localhost:3000/uer/update/${registrationId}`, {
@@ -235,14 +238,14 @@ async function updateRegistration(registrationId, eventId, registration) {
             Swal.fire({
                 icon: 'success',
                 title: 'Registration Updated',
-                text: 'File Benefit berhasil ditambahkan.',
+                text: 'Status berhasil diperbarui.',
             });
             window.location.reload();
         } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Update Failed',
-                text: 'Gagal menambahkan file benefit.',
+                text: 'Gagal memperbarui status registrasi.',
             });
         }
     } catch (error) {
@@ -250,7 +253,7 @@ async function updateRegistration(registrationId, eventId, registration) {
         Swal.fire({
             icon: 'error',
             title: 'An error occurred',
-            text: 'An unexpected error occurred while updating the registration.',
+            text: 'Terjadi kesalahan saat memperbarui registrasi.',
         });
     }
 }

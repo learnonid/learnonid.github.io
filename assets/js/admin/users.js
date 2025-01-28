@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPage = 1;
     const itemsPerPage = 5;
     let totalUsers = 0;
+    let currentUserId = null; // Pastikan variabel ini bisa null di awal
 
     const userTableBody = document.getElementById('userTableBody');
     const prevPageButton = document.getElementById('prevPage');
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td class="px-6 py-4">${user.user_id || 'N/A'}</td>
                 <td class="px-6 py-4">${user.full_name || 'N/A'}</td>
-                <td href="mailto:${user.mail}" class="px-6 py-4">${user.email || 'N/A'}</td>
+                <td href="mailto:${user.email}" class="px-6 py-4">${user.email || 'N/A'}</td>
                 <td href="https://wa.me/${user.phone_number}" class="px-6 py-4">${user.phone_number || 'N/A'}</td>
                 <td class="px-6 py-4">${user.role_id === 1 ? 'Admin' : 'User'}</td>
                 <td class="px-6 py-4 flex gap-2">
@@ -97,8 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchUsers();
 
     // Edit User
-    window.editUser = async function(userId) {
+    window.editUser = async function (userId) {
         try {
+            currentUserId = userId; // Simpan userId ke variabel global
             const response = await fetch(`http://127.0.0.1:3000/user/detail/${userId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch user details');
@@ -110,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('full_name').value = user.full_name;
             document.getElementById('email').value = user.email;
             document.getElementById('phone').value = user.phone_number;
+            document.getElementById('password').value = user.password;
             document.getElementById('role').value = user.role_id === 1 ? 'admin' : 'user';
 
             document.getElementById('userModal').classList.remove('hidden');
@@ -120,14 +123,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save User Changes
     document.getElementById('saveChanges').addEventListener('click', async () => {
-        const userId = document.getElementById('userId').value; // Ambil ID pengguna dari modal (pastikan Anda memiliki field ini)
-        const fullName = document.getElementById('full_name').value;
-        const email = document.getElementById('email').value;
-        const phoneNumber = document.getElementById('phone').value;
-        const role = document.getElementById('role').value === 'admin' ? 1 : 2; // Admin = 1, User = 2
-
         try {
-            const response = await fetch(`http://127.0.0.1:3000/user/update/${userId}`, {
+            if (!currentUserId) {
+                Swal.fire('Error', 'User ID tidak ditemukan.', 'error');
+                return;
+            }
+
+            const fullName = document.getElementById('full_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phoneNumber = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const role = document.getElementById('role').value === 'admin' ? 1 : 2;  // perbaikan dari role_id menjadi role
+
+            if (!fullName || !email || !phoneNumber) {
+                Swal.fire('Error', 'Semua field harus diisi!', 'error');
+                return;
+            }
+
+            const response = await fetch(`http://127.0.0.1:3000/user/update/${currentUserId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -136,12 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     full_name: fullName,
                     email: email,
                     phone_number: phoneNumber,
+                    password: password,
                     role_id: role,
                 }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to update user');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal memperbarui data user');
             }
 
             Swal.fire('Berhasil!', 'User berhasil diperbarui', 'success');
@@ -153,9 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
     // Delete User
-    window.deleteUser = async function(userId) {
+    window.deleteUser = async function (userId) {
         const confirmation = await Swal.fire({
             title: 'Ingin Menghapus?',
             text: 'Kamu tidak akan bisa mengembalikan data yang sudah dihapus!',
@@ -184,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // cancel button
     document.getElementById('cancelButton').addEventListener('click', () => {
         document.getElementById('userModal').classList.add('hidden');
     });
